@@ -1,0 +1,37 @@
+{
+    "ButtoncontainsLataalis": {
+        "screenshot": ".images\\buttoncontainslataalis-screenshot.png",
+        "source": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/",
+        "strategy": "xpath",
+        "type": "browser",
+        "value": "//button[contains(.,'Lataa lis\u00e4\u00e4')]"
+    },
+    "Compasscardnthchild1cardbuttonscompassbutton": {
+        "screenshot": ".images\\compasscardnthchild1cardbuttonscompassbutton-screenshot.png",
+        "source": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/",
+        "strategy": "css",
+        "type": "browser",
+        "value": ".compass-card .card__buttons > .compass-button"
+    },
+    "Compassinput": {
+        "screenshot": ".images\\compassinput-screenshot.png",
+        "source": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/",
+        "strategy": "css",
+        "type": "browser",
+        "value": ".compass-input"
+    },
+    "Compasslabelnthchild7compasscheckbox": {
+        "screenshot": ".images\\compasslabelnthchild7compasscheckbox-screenshot.png",
+        "source": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/",
+        "strategy": "css",
+        "type": "browser",
+        "value": ".compass-label:nth-child(7) > .compass-checkbox"
+    },
+    "DeclineButton": {
+        "screenshot": ".images\\declinebutton-screenshot.png",
+        "source": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/",
+        "strategy": "id",
+        "type": "browser",
+        "value": "declineButton"
+    }
+}
