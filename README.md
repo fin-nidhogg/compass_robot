@@ -12,4 +12,4 @@ Prosessin toimintakuvaus
 
 Prosessi alkaa siitä, että suunnataan Compass Groupin verkkosivuille hakemaan lounaspaikkaa. Lähdetään rajaamaan sitä alueella Helsinki ja opiskelijalounas-kriteerillä. Haetaan jokainen paikka erikseen ja käydään suodattamassa jokaisen ravintolan lounaslistasta se lounas, joka on mahdollista opiskelijalounaana ostaa. Nämä niputetaan yhteen PDF-tiedostoon, joka lähetetään sähköpostitse päivittäin tai viikoittain robotin asiakkaalle.
 
-Asiakas saa siis tässä täysin automaattisesti joko päivä- tai viikkotason näkymän Helsingin opiskelijalounaista sähköpostiinsa.
+## Asiakas saa siis tässä täysin automaattisesti joko päivä- tai viikkotason näkymän Helsingin opiskelijalounaista sähköpostiinsa.
