@@ -6,10 +6,11 @@ from robocorp import browser
 def compass_robot_tasks():
     """Open compass website and add relevant filters"""
     browser.configure(
-        slowmo=1000,
+        slowmo=2000,
     )
     open_compass_website()
     cookieMonster()
+    apply_filters()
     getLinks()
 
 
@@ -24,12 +25,25 @@ def cookieMonster():
     page.click("#declineButton")
 
 
+def apply_filters():
+    """apply search Helsinki and opiskelijaruokailu"""
+    page = browser.page()
+    page.click(".compass-label:nth-child(7) > .compass-checkbox")
+    page.fill(".compass-input.search-input", "Helsinki")
+    page.click("//button[contains(.,'Hae')]")
+
+    # Click "Lataa lisää" until theres no more links to load
+    while page.is_visible("//button[contains(.,'Lataa lis\u00e4\u00e4')]"):
+        page.click("//button[contains(.,'Lataa lis\u00e4\u00e4')]")
+
+
 def getLinks():
     """Reads all links and prints those bastards to the log"""
     full_urls = []
     page = browser.page()
     link_elements = page.query_selector_all("//a[contains(.,'Näytä ruokalista')]")
 
+    # Loop through each link element and get hrefs
     for link_element in link_elements:
         full_url = "https://compass-group.fi" + link_element.get_attribute("href")
         full_urls.append(full_url)
