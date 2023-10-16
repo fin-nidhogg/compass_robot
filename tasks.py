@@ -8,10 +8,15 @@ def compass_robot_tasks():
     browser.configure(
         slowmo=2000,
     )
-    open_compass_website()
-    cookieMonster()
-    apply_filters()
-    getLinks()
+
+    try:
+        open_compass_website()
+    except Exception as error:
+        print(f"An error occured: {str(error)}")
+    else:
+        cookieMonster()
+        apply_filters()
+        getLinks()
 
 
 def open_compass_website():
