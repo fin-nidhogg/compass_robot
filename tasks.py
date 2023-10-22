@@ -56,35 +56,71 @@ def getLinks():
 
     return full_urls
 
+for url in full_urls
+
+        from RPA.Browser.Selenium import Selenium
+        from typing import List
+
+
+            class Lunch:
+                def __init__(self, heading: str, spans: List[str]):
+                    self.heading = heading
+                    self.spans = spans
+
+                def add_spans(self, value: str):
+                    self.spans.append(value)
+
+
+            def create_lunch_objects(url: str) -> List[Lunch]:
+                browser = Selenium()
+                browser.open_available_browser(url)
+
+                lunch_objects = []
+                menu_packages = browser.find_elements("css:.lunch-menu-block__menu-package")
+
+                for package in menu_packages:
+                    heading = browser.find_element("css:h5.compass-heading", package).text
+                    spans = browser.find_elements("css:span.compass-text", package)
+                    spans = [span.text for span in spans]
+
+                    lunch = Lunch(heading, spans)
+                    lunch_objects.append(lunch)
+
+                browser.close_browser()
+
+                return lunch_objects
+
+
+create_lunch_objects()
+
 
 from RPA.Browser.Selenium import Selenium
-from typing import List
-
 
 class Lunch:
-    def __init__(self, heading: str, spans: List[str]):
+    def __init__(self, heading):
         self.heading = heading
-        self.spans = spans
+        self.spans = []
 
-    def add_spans(self, value: str):
-        self.spans.append(value)
+    def add_spans(self, span):
+        self.spans.append(span)
 
-
-def create_lunch_objects(url: str) -> List[Lunch]:
+def get_lunch_menu(url):
     browser = Selenium()
     browser.open_available_browser(url)
 
-    lunch_objects = []
-    menu_packages = browser.find_elements("css:.lunch-menu-block__menu-package")
+    menu_elements = browser.find_elements('css:lunch-menu-block__menu-package')
+    lunch_list = []
 
-    for package in menu_packages:
-        heading = browser.find_element("css:h5.compass-heading", package).text
-        spans = browser.find_elements("css:span.compass-text", package)
-        spans = [span.text for span in spans]
+    for element in menu_elements:
+        heading = browser.find_element('css:H5.compass-heading', parent=element).text
+        lunch = Lunch(heading)
 
-        lunch = Lunch(heading, spans)
-        lunch_objects.append(lunch)
+        span_elements = browser.find_elements('css:span.compass-text', parent=element)
+        for span in span_elements:
+            lunch.add_spans(span.text)
+
+        lunch_list.append(lunch)
 
     browser.close_browser()
 
-    return lunch_objects
+    return lunch_list
