@@ -55,3 +55,36 @@ def getLinks():
         print(full_url)
 
     return full_urls
+
+
+from RPA.Browser.Selenium import Selenium
+from typing import List
+
+
+class Lunch:
+    def __init__(self, heading: str, spans: List[str]):
+        self.heading = heading
+        self.spans = spans
+
+    def add_spans(self, value: str):
+        self.spans.append(value)
+
+
+def create_lunch_objects(url: str) -> List[Lunch]:
+    browser = Selenium()
+    browser.open_available_browser(url)
+
+    lunch_objects = []
+    menu_packages = browser.find_elements("css:.lunch-menu-block__menu-package")
+
+    for package in menu_packages:
+        heading = browser.find_element("css:h5.compass-heading", package).text
+        spans = browser.find_elements("css:span.compass-text", package)
+        spans = [span.text for span in spans]
+
+        lunch = Lunch(heading, spans)
+        lunch_objects.append(lunch)
+
+    browser.close_browser()
+
+    return lunch_objects
