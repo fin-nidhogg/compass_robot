@@ -1,65 +1,68 @@
 from robocorp.tasks import task
-from robocorp import browser
+from RPA.Browser.Selenium import Selenium
 import logging
 
 # Setting general variables
-SLOWMODELAY = 500
+SLOWMODELAY = 1500
 COMPASS_WEBSITE_URL = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/"
-DECLINE_BUTTON_SELECTOR = "#declineButton"
-FILTER_SELECTOR = ".compass-label:nth-child(7) > .compass-checkbox"
-SEARCH_INPUT_SELECTOR = ".compass-input.search-input"
+DECLINE_BUTTON_SELECTOR = "css:#declineButton"
+FILTER_SELECTOR = "css:.compass-label:nth-child(7) > .compass-checkbox"
+SEARCH_INPUT_SELECTOR = "css:.compass-input.search-input"
 SEARCH_TERM = "Helsinki"
-SEARCH_BUTTON_SELECTOR = "//button[contains(.,'Hae')]"
-LOAD_MORE_BUTTON_SELECTOR = "//button[contains(.,'Lataa lis\u00e4\u00e4')]"
-RESTAURANT_LINK_SELECTOR = "//a[contains(.,'Näytä ruokalista')]"
+SEARCH_BUTTON_SELECTOR = "xpath://button[contains(.,'Hae')]"
+LOAD_MORE_BUTTON_SELECTOR = "xpath://button[contains(.,'Lataa lis\u00e4\u00e4')]"
+RESTAURANT_LINK_SELECTOR = "xpath://a[contains(.,'N\u00e4yt\u00e4 ruokalista')]"
 BASE_URL = "https://compass-group.fi"
+H5SELECTOR = "css:h5.compass-heading"
+
+browser = Selenium()
 
 
+# MAIN FUNCTION STARTS HERE
 @task
 def compass_robot_tasks():
     """Open compass website and add relevant filters"""
-    browser.configure(
-        slowmo=SLOWMODELAY,
-    )
-
     try:
         open_compass_website()
         decline_all_cookies()
         apply_filters()
         getLinks()
+        getMenu(url)
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
 
 
+# MAIN FUNCTION ENDS HERE
+
+
 def open_compass_website():
     """Navigate to compass website"""
-    browser.goto(COMPASS_WEBSITE_URL)
-    page = browser.page()
+    browser.open_available_browser(COMPASS_WEBSITE_URL)
+    browser.maximize_browser_window()
 
 
 def decline_all_cookies():
     """Decline all cookies"""
-    page = browser.page()
-    page.click(DECLINE_BUTTON_SELECTOR)
+    browser.click_element(DECLINE_BUTTON_SELECTOR)
 
 
 def apply_filters():
     """apply search Helsinki and opiskelijaruokailu"""
-    page = browser.page()
-    page.click(FILTER_SELECTOR)
-    page.fill(SEARCH_INPUT_SELECTOR, SEARCH_TERM)
-    page.click(SEARCH_BUTTON_SELECTOR)
+    browser.wait_until_element_is_visible(FILTER_SELECTOR)
+    browser.click_element(FILTER_SELECTOR)
+    browser.input_text(SEARCH_INPUT_SELECTOR, SEARCH_TERM)
+    browser.click_element(SEARCH_BUTTON_SELECTOR)
 
     # Click "Lataa lisää" until theres no more links to load
-    while page.is_visible(LOAD_MORE_BUTTON_SELECTOR):
-        page.click(LOAD_MORE_BUTTON_SELECTOR)
+    while browser.is_element_visible(LOAD_MORE_BUTTON_SELECTOR):
+        browser.click_element(LOAD_MORE_BUTTON_SELECTOR)
 
 
 def getLinks():
     """Reads all links and prints those bastards to the log"""
     full_urls = []
-    page = browser.page()
-    link_elements = page.query_selector_all(RESTAURANT_LINK_SELECTOR)
+    browser.wait_until_element_is_visible(FILTER_SELECTOR)
+    link_elements = browser.find_elements(RESTAURANT_LINK_SELECTOR)
 
     # Loop through each link element and get hrefs
     for link_element in link_elements:
@@ -69,71 +72,14 @@ def getLinks():
 
     return full_urls
 
-for url in full_urls
 
-        from RPA.Browser.Selenium import Selenium
-        from typing import List
-
-
-            class Lunch:
-                def __init__(self, heading: str, spans: List[str]):
-                    self.heading = heading
-                    self.spans = spans
-
-                def add_spans(self, value: str):
-                    self.spans.append(value)
+## VAIN TESTIIN PERKELE!
+url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc/"
 
 
-            def create_lunch_objects(url: str) -> List[Lunch]:
-                browser = Selenium()
-                browser.open_available_browser(url)
-
-                lunch_objects = []
-                menu_packages = browser.find_elements("css:.lunch-menu-block__menu-package")
-
-                for package in menu_packages:
-                    heading = browser.find_element("css:h5.compass-heading", package).text
-                    spans = browser.find_elements("css:span.compass-text", package)
-                    spans = [span.text for span in spans]
-
-                    lunch = Lunch(heading, spans)
-                    lunch_objects.append(lunch)
-
-                browser.close_browser()
-
-                return lunch_objects
-
-
-create_lunch_objects()
-
-
-from RPA.Browser.Selenium import Selenium
-
-class Lunch:
-    def __init__(self, heading):
-        self.heading = heading
-        self.spans = []
-
-    def add_spans(self, span):
-        self.spans.append(span)
-
-def get_lunch_menu(url):
-    browser = Selenium()
-    browser.open_available_browser(url)
-
-    menu_elements = browser.find_elements('css:lunch-menu-block__menu-package')
-    lunch_list = []
-
-    for element in menu_elements:
-        heading = browser.find_element('css:H5.compass-heading', parent=element).text
-        lunch = Lunch(heading)
-
-        span_elements = browser.find_elements('css:span.compass-text', parent=element)
-        for span in span_elements:
-            lunch.add_spans(span.text)
-
-        lunch_list.append(lunch)
-
-    browser.close_browser()
-
-    return lunch_list
+def getMenu(url):
+    browser.go_to(url)
+    browser.wait_until_element_is_visible(H5SELECTOR)
+    heading_elements = browser.find_elements(H5SELECTOR)
+    heading_texts = [browser.get_text(heading) for heading in heading_elements]
+    return heading_texts
