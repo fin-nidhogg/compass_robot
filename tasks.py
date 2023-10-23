@@ -1,6 +1,8 @@
 from robocorp.tasks import task
+from RPA.FileSystem import FileSystem
 from RPA.Browser.Selenium import Selenium
 import logging
+from selenium.webdriver.common.by import By
 
 # Setting general variables
 SLOWMODELAY = 1500
@@ -12,8 +14,11 @@ SEARCH_TERM = "Helsinki"
 SEARCH_BUTTON_SELECTOR = "xpath://button[contains(.,'Hae')]"
 LOAD_MORE_BUTTON_SELECTOR = "xpath://button[contains(.,'Lataa lis\u00e4\u00e4')]"
 RESTAURANT_LINK_SELECTOR = "xpath://a[contains(.,'N\u00e4yt\u00e4 ruokalista')]"
+RESTAURANT_NAME_SELECTOR = "css:h1.compass-heading"
 BASE_URL = "https://compass-group.fi"
-H5SELECTOR = "css:h5.compass-heading"
+LUNCH_MENU_PACKAGE = "css:.lunch-menu-block__menu-package"
+LUNCH_NAME_SELECTOR = "h5.compass-heading"
+MEALS_SELECTOR = "css:.lunch-menu-block__content--meals"
 
 browser = Selenium()
 
@@ -23,13 +28,15 @@ browser = Selenium()
 def compass_robot_tasks():
     """Open compass website and add relevant filters"""
     try:
+        clear_file()
         open_compass_website()
         decline_all_cookies()
         apply_filters()
         getLinks()
-        getMenu(url)
+        browser.close_browser()
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
+        browser.close_browser()
 
 
 # MAIN FUNCTION ENDS HERE
@@ -73,13 +80,34 @@ def getLinks():
     return full_urls
 
 
-## VAIN TESTIIN PERKELE!
-url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc/"
-
-
 def getMenu(url):
     browser.go_to(url)
-    browser.wait_until_element_is_visible(H5SELECTOR)
-    heading_elements = browser.find_elements(H5SELECTOR)
-    heading_texts = [browser.get_text(heading) for heading in heading_elements]
-    return heading_texts
+    browser.wait_until_element_is_visible(LUNCH_MENU_PACKAGE)
+    menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
+    restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
+    write_to_file(f" {restaurantName}\n")
+
+    for menuPackage in menuPackages:
+        menuNames = menuPackage.find_elements(By.CSS_SELECTOR, ".meal-item")
+        menuName = browser.get_text(
+            menuPackage.find_element(By.CSS_SELECTOR, ".compass-heading")
+        )
+        write_to_file(f"\n{menuName}\n")
+        for menuName in menuNames:
+            menu_name_text = browser.get_text(
+                menuName.find_element(By.CSS_SELECTOR, ".compass-accordion")
+            )
+            write_to_file(f"{menu_name_text}\n")
+
+
+def clear_file():
+    fs = FileSystem()
+    if fs.does_file_exist("output/lunchlist.txt"):
+        fs.remove_file("output/lunchlist.txt")
+        fs.create_file("output/lunchlist.txt", "Todays lunch! @ ")
+
+
+def write_to_file(txtToAppend):
+    fs = FileSystem()
+    with open("output/lunchlist.txt", "a", encoding="utf-8") as file:
+        file.write(txtToAppend)
