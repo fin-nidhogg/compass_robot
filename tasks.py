@@ -1,58 +1,71 @@
 from robocorp.tasks import task
 from robocorp import browser
+import logging
+
+# Setting general variables
+SLOWMODELAY = 500
+COMPASS_WEBSITE_URL = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/"
+DECLINE_BUTTON_SELECTOR = "#declineButton"
+FILTER_SELECTOR = ".compass-label:nth-child(7) > .compass-checkbox"
+SEARCH_INPUT_SELECTOR = ".compass-input.search-input"
+SEARCH_TERM = "Helsinki"
+SEARCH_BUTTON_SELECTOR = "//button[contains(.,'Hae')]"
+LOAD_MORE_BUTTON_SELECTOR = "//button[contains(.,'Lataa lis\u00e4\u00e4')]"
+RESTAURANT_LINK_SELECTOR = "//a[contains(.,'Näytä ruokalista')]"
+BASE_URL = "https://compass-group.fi"
 
 
 @task
 def compass_robot_tasks():
     """Open compass website and add relevant filters"""
     browser.configure(
-        slowmo=2000,
+        slowmo=SLOWMODELAY,
     )
 
     try:
         open_compass_website()
-    except Exception as error:
-        print(f"An error occured: {str(error)}")
-    else:
-        cookieMonster()
+        decline_all_cookies()
         apply_filters()
         getLinks()
+    except Exception as error:
+        logging.error(f"An error occured: {str(error)}")
 
 
 def open_compass_website():
     """Navigate to compass website"""
-    browser.goto("https://www.compass-group.fi/ravintolat-ja-ruokalistat/")
-
-
-def cookieMonster():
-    """Mercilessly decline all cookies"""
+    browser.goto(COMPASS_WEBSITE_URL)
     page = browser.page()
-    page.click("#declineButton")
+
+
+def decline_all_cookies():
+    """Decline all cookies"""
+    page = browser.page()
+    page.click(DECLINE_BUTTON_SELECTOR)
 
 
 def apply_filters():
     """apply search Helsinki and opiskelijaruokailu"""
     page = browser.page()
-    page.click(".compass-label:nth-child(7) > .compass-checkbox")
-    page.fill(".compass-input.search-input", "Helsinki")
-    page.click("//button[contains(.,'Hae')]")
+    page.click(FILTER_SELECTOR)
+    page.fill(SEARCH_INPUT_SELECTOR, SEARCH_TERM)
+    page.click(SEARCH_BUTTON_SELECTOR)
 
     # Click "Lataa lisää" until theres no more links to load
-    while page.is_visible("//button[contains(.,'Lataa lis\u00e4\u00e4')]"):
-        page.click("//button[contains(.,'Lataa lis\u00e4\u00e4')]")
+    while page.is_visible(LOAD_MORE_BUTTON_SELECTOR):
+        page.click(LOAD_MORE_BUTTON_SELECTOR)
 
 
 def getLinks():
     """Reads all links and prints those bastards to the log"""
     full_urls = []
     page = browser.page()
-    link_elements = page.query_selector_all("//a[contains(.,'Näytä ruokalista')]")
+    link_elements = page.query_selector_all(RESTAURANT_LINK_SELECTOR)
 
     # Loop through each link element and get hrefs
     for link_element in link_elements:
-        full_url = "https://compass-group.fi" + link_element.get_attribute("href")
+        full_url = BASE_URL + link_element.get_attribute("href")
         full_urls.append(full_url)
-        print(full_url)
+        logging.info(full_url)
 
     return full_urls
 
