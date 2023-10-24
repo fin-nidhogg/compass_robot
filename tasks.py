@@ -21,7 +21,12 @@ BASE_URL = "https://compass-group.fi"
 LUNCH_MENU_PACKAGE = "css:.lunch-menu-block__menu-package"
 LUNCH_NAME_SELECTOR = "h5.compass-heading"
 MEALS_SELECTOR = "css:.lunch-menu-block__content--meals"
-EMAIL_RECIPIENTS = ["ari-pekka.kantola@student.laurea.fi", "aripekka.kantola@gmail.com"]
+EMAIL_RECIPIENTS = [
+    "ari-pekka.kantola@student.laurea.fi",
+    "aripekka.kantola@gmail.com",
+    "olli.puustinen@student.laurea.fi",
+    "mira.valkama@student.laurea.fi",
+]
 
 browser = Selenium()
 fs = FileSystem()
@@ -43,7 +48,8 @@ def compass_robot_tasks():
                 getMenu(destination)
             except:
                 pass
-        send_html_email()
+
+        # send_html_email()
 
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
@@ -116,7 +122,7 @@ def getMenu(url):
             )
 
             # Write H5 and price in the file
-            write_to_file(f"<p>{menuName}</b><br><i>{menuPrice}</i></p>")
+            write_to_file(f"<p><b>{menuName}</b><br><i>{menuPrice}</i></p>")
 
             # Get meal names and write those into file
             mealItems = menuPackage.find_elements(By.CSS_SELECTOR, ".compass-accordion")
@@ -128,6 +134,7 @@ def getMenu(url):
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
                 write_to_file(f"{mealName}<br>{mealDiet}<br><br>")
+        browser.close_browser()
     except Exception as error:
         write_to_file(
             f"An error occured while getting info from: {url}\n Error: {str(error)}"
