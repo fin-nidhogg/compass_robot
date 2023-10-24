@@ -1,10 +1,10 @@
+from datetime import date
 from robocorp.tasks import task
-from RPA.FileSystem import FileSystem
 from RPA.Browser.Selenium import Selenium
-from RPA.Excel.Files import Files
-from RPA.Tables import Tables
-import logging
+from RPA.Email.ImapSmtp import ImapSmtp
+from RPA.FileSystem import FileSystem
 from selenium.webdriver.common.by import By
+import logging
 
 # Setting general variables
 SLOWMODELAY = 1500
@@ -21,6 +21,7 @@ BASE_URL = "https://compass-group.fi"
 LUNCH_MENU_PACKAGE = "css:.lunch-menu-block__menu-package"
 LUNCH_NAME_SELECTOR = "h5.compass-heading"
 MEALS_SELECTOR = "css:.lunch-menu-block__content--meals"
+EMAIL_RECIPIENTS = ["ari-pekka.kantola@student.laurea.fi", "aripekka.kantola@gmail.com"]
 
 browser = Selenium()
 fs = FileSystem()
@@ -30,17 +31,20 @@ fs = FileSystem()
 @task
 def compass_robot_tasks():
     """Open compass website and add relevant filters"""
+
     try:
         open_compass_website()
         decline_all_cookies()
         apply_filters()
-        getLinks()
         clear_file()
-        getMenu(url)
-        getMenu(url2)
-        getMenu(url3)
-        txtToExcel()
-        browser.close_browser()
+        destinationUrls = getLinks()
+        for destination in destinationUrls:
+            try:
+                getMenu(destination)
+            except:
+                pass
+        send_html_email()
+
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
         browser.close_browser()
@@ -75,24 +79,15 @@ def apply_filters():
 def getLinks():
     """Reads all links and returns array of full urls"""
     full_urls = []
-    browser.wait_until_element_is_visible(FILTER_SELECTOR)
+    browser.wait_until_element_is_visible(RESTAURANT_LINK_SELECTOR)
     link_elements = browser.find_elements(RESTAURANT_LINK_SELECTOR)
 
     # Loop through each link element and get hrefs
     for link_element in link_elements:
-        full_url = BASE_URL + link_element.get_attribute("href")
-        full_urls.append(full_url)
-        logging.info(full_url)
-
+        url = link_element.get_attribute("href")
+        full_urls.append(url)
+        logging.info(url)
     return full_urls
-
-
-### VAIN TESTI ### Tähän tulee myöhemmin looppi. ###
-url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc"
-url2 = (
-    "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bl"
-)
-url3 = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc"
 
 
 def getMenu(url):
@@ -108,7 +103,7 @@ def getMenu(url):
         # Scrape and write name of restaurant into temp file.
         menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
         restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
-        write_to_file(f" {restaurantName}\n")
+        write_to_file(f"<h3>Ravintola: {restaurantName}</h3>\n")
 
         # Loop through menuPackages and get different menus as a child list.
         # Iterate through menuPackages list and get heading
@@ -121,15 +116,18 @@ def getMenu(url):
             )
 
             # Write H5 and price in the file
-            write_to_file(f"\n{menuName}\n{menuPrice}\n\n")
+            write_to_file(f"<p>{menuName}</b><br><i>{menuPrice}</i></p>")
 
             # Get meal names and write those into file
-            mealItems = menuPackage.find_elements(By.CSS_SELECTOR, ".meal-item")
+            mealItems = menuPackage.find_elements(By.CSS_SELECTOR, ".compass-accordion")
             for mealItem in mealItems:
-                mealText = browser.get_text(
-                    mealItem.find_element(By.CSS_SELECTOR, ".compass-accordion")
+                mealName = browser.get_text(
+                    mealItem.find_element(By.CSS_SELECTOR, "span.compass-text")
                 )
-                write_to_file(f"{mealText}\n")
+
+                mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
+
+                write_to_file(f"{mealName}<br>{mealDiet}<br><br>")
     except Exception as error:
         write_to_file(
             f"An error occured while getting info from: {url}\n Error: {str(error)}"
@@ -139,26 +137,37 @@ def getMenu(url):
 
 
 def clear_file():
-    if fs.does_file_exist("output/lunchlist.txt"):
-        fs.remove_file("output/lunchlist.txt")
-    fs.create_file("output/lunchlist.txt", "Todays lunch! @ ")
+    if fs.does_file_exist("output/lunchlist.html"):
+        fs.remove_file("output/lunchlist.html")
+    fs.create_file("output/lunchlist.html")
 
 
 def write_to_file(txtToAppend):
-    with open("output/lunchlist.txt", "a", encoding="utf-8") as file:
+    with open("output/lunchlist.html", "a", encoding="utf-8") as file:
         file.write(txtToAppend)
 
 
-def txtToExcel():
-    excel = Files()
-    tables = Tables()
+def send_html_email():
+    # Create an instance of the ImapSmtp class
+    mail = ImapSmtp()
 
-    with open("output/lunchlist.txt", encoding="utf-8") as file:
-        data = [line.split() for line in file.readlines()]
-    table = tables.create_table(data)
+    # Read html payload
+    payload = fs.read_file("output/lunchlist.html")
+    # Configure SMTP server settings. Normally these would be located hidden.
+    mail.account = "compasrobot@gmail.com"
+    mail.password = "nohnpuggskupcqdi"
+    mail.smtp_server = "smtp.gmail.com"
+    mail.smtp_port = 587
+    mail.smtp_starttls = True
 
-    if fs.does_file_exist("output/lunchlist.xlsx"):
-        fs.remove_file("output/lunchlist.xlsx")
-    excel.create_workbook("output/lunchlist.xlsx")
-    excel.append_rows_to_worksheet(table, "Sheet")
-    excel.save_workbook()
+    # Authenticate with the SMTP server
+    mail.authorize_smtp()
+
+    # Send an email
+    mail.send_message(
+        "compasrobot@gmail.com",
+        EMAIL_RECIPIENTS,
+        f"Päivän ruokalistat olkaa hyvä ({date.today()})",
+        payload,
+        html=True,
+    )
