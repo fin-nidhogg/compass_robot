@@ -1,6 +1,8 @@
 from robocorp.tasks import task
 from RPA.FileSystem import FileSystem
 from RPA.Browser.Selenium import Selenium
+from RPA.Excel.Files import Files
+from RPA.Tables import Tables
 import logging
 from selenium.webdriver.common.by import By
 
@@ -21,6 +23,7 @@ LUNCH_NAME_SELECTOR = "h5.compass-heading"
 MEALS_SELECTOR = "css:.lunch-menu-block__content--meals"
 
 browser = Selenium()
+fs = FileSystem()
 
 
 # MAIN FUNCTION STARTS HERE
@@ -28,11 +31,13 @@ browser = Selenium()
 def compass_robot_tasks():
     """Open compass website and add relevant filters"""
     try:
-        clear_file()
         open_compass_website()
         decline_all_cookies()
         apply_filters()
         getLinks()
+        clear_file()
+        getMenu(url)
+        txtToExcel()
         browser.close_browser()
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
@@ -80,6 +85,9 @@ def getLinks():
     return full_urls
 
 
+url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc/"
+
+
 def getMenu(url):
     browser.go_to(url)
     browser.wait_until_element_is_visible(LUNCH_MENU_PACKAGE)
@@ -92,7 +100,12 @@ def getMenu(url):
         menuName = browser.get_text(
             menuPackage.find_element(By.CSS_SELECTOR, ".compass-heading")
         )
+        menuPrice = browser.get_text(
+            menuPackage.find_element(By.CSS_SELECTOR, ".compass-text")
+        )
+
         write_to_file(f"\n{menuName}\n")
+        write_to_file(f"\n{menuPrice}\n")
         for menuName in menuNames:
             menu_name_text = browser.get_text(
                 menuName.find_element(By.CSS_SELECTOR, ".compass-accordion")
@@ -101,13 +114,28 @@ def getMenu(url):
 
 
 def clear_file():
-    fs = FileSystem()
     if fs.does_file_exist("output/lunchlist.txt"):
         fs.remove_file("output/lunchlist.txt")
-        fs.create_file("output/lunchlist.txt", "Todays lunch! @ ")
+    fs.create_file("output/lunchlist.txt", "Todays lunch! @ ")
 
 
 def write_to_file(txtToAppend):
-    fs = FileSystem()
     with open("output/lunchlist.txt", "a", encoding="utf-8") as file:
         file.write(txtToAppend)
+
+
+def txtToExcel():
+    excel = Files()
+    tables = Tables()
+
+    with open("output/lunchlist.txt") as file:
+        data = [line.split() for line in file.readlines()]
+    table = tables.create_table(data)
+
+    if fs.does_file_exist("output/lunchlist.xlsx"):
+        fs.remove_file("output/lunchlist.xlsx")
+    excel.create_workbook("output/lunchlist.xlsx")
+
+    excel.append_rows_to_worksheet("Sheet1", table)
+
+    excel.save_workbook()
