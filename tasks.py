@@ -49,8 +49,8 @@ def compass_robot_tasks():
             except:
                 pass
 
-        # send_html_email()
-
+        send_html_email()
+        browser.close_browser()
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
         browser.close_browser()
@@ -134,7 +134,6 @@ def getMenu(url):
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
                 write_to_file(f"{mealName}<br>{mealDiet}<br><br>")
-        browser.close_browser()
     except Exception as error:
         write_to_file(
             f"An error occured while getting info from: {url}\n Error: {str(error)}"
