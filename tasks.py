@@ -125,6 +125,7 @@ def write_to_file(txtToAppend):
         file.write(txtToAppend)
 
 
+"""
 def txtToExcel():
     excel = Files()
     tables = Tables()
@@ -138,3 +139,4 @@ def txtToExcel():
     excel.create_workbook("output/excel/lunchlist.xlsx")
     excel.append_rows_to_worksheet(table, "Sheet")
     excel.save_workbook()
+"""
