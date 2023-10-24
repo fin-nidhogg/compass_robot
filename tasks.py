@@ -85,6 +85,7 @@ def getLinks():
     return full_urls
 
 
+### VAIN TESTI ### Tähän tulee myöhemmin looppi. ###
 url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc/"
 
 
