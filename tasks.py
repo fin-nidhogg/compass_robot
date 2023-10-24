@@ -37,6 +37,8 @@ def compass_robot_tasks():
         getLinks()
         clear_file()
         getMenu(url)
+        getMenu(url2)
+        getMenu(url3)
         txtToExcel()
         browser.close_browser()
     except Exception as error:
@@ -71,7 +73,7 @@ def apply_filters():
 
 
 def getLinks():
-    """Reads all links and prints those bastards to the log"""
+    """Reads all links and returns array of full urls"""
     full_urls = []
     browser.wait_until_element_is_visible(FILTER_SELECTOR)
     link_elements = browser.find_elements(RESTAURANT_LINK_SELECTOR)
@@ -86,32 +88,54 @@ def getLinks():
 
 
 ### VAIN TESTI ### Tähän tulee myöhemmin looppi. ###
-url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc/"
+url = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc"
+url2 = (
+    "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bl"
+)
+url3 = "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc"
 
 
 def getMenu(url):
-    browser.go_to(url)
-    browser.wait_until_element_is_visible(LUNCH_MENU_PACKAGE)
-    menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
-    restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
-    write_to_file(f" {restaurantName}\n")
+    """Scrapes lunch info from given restaurant url"""
+    try:
+        # Browse to given url passed as argument
+        browser.go_to(url)
 
-    for menuPackage in menuPackages:
-        menuNames = menuPackage.find_elements(By.CSS_SELECTOR, ".meal-item")
-        menuName = browser.get_text(
-            menuPackage.find_element(By.CSS_SELECTOR, ".compass-heading")
-        )
-        menuPrice = browser.get_text(
-            menuPackage.find_element(By.CSS_SELECTOR, ".compass-text")
-        )
+        # Wait until all nessessary info is visible
+        browser.wait_until_element_is_visible(LUNCH_MENU_PACKAGE)
 
-        write_to_file(f"\n{menuName}\n")
-        write_to_file(f"\n{menuPrice}\n")
-        for menuName in menuNames:
-            menu_name_text = browser.get_text(
-                menuName.find_element(By.CSS_SELECTOR, ".compass-accordion")
+        # Get high level menu packages into iterable menuPackages.
+        # Scrape and write name of restaurant into temp file.
+        menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
+        restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
+        write_to_file(f" {restaurantName}\n")
+
+        # Loop through menuPackages and get different menus as a child list.
+        # Iterate through menuPackages list and get heading
+        for menuPackage in menuPackages:
+            menuName = browser.get_text(
+                menuPackage.find_element(By.CSS_SELECTOR, ".compass-heading")
             )
-            write_to_file(f"{menu_name_text}\n")
+            menuPrice = browser.get_text(
+                menuPackage.find_element(By.CSS_SELECTOR, ".compass-text")
+            )
+
+            # Write H5 and price in the file
+            write_to_file(f"\n{menuName}\n{menuPrice}\n\n")
+
+            # Get meal names and write those into file
+            mealItems = menuPackage.find_elements(By.CSS_SELECTOR, ".meal-item")
+            for mealItem in mealItems:
+                mealText = browser.get_text(
+                    mealItem.find_element(By.CSS_SELECTOR, ".compass-accordion")
+                )
+                write_to_file(f"{mealText}\n")
+    except Exception as error:
+        write_to_file(
+            f"An error occured while getting info from: {url}\n Error: {str(error)}"
+        )
+        logging.error(f"An error occured: {str(error)}")
+        pass
 
 
 def clear_file():
