@@ -125,18 +125,16 @@ def write_to_file(txtToAppend):
         file.write(txtToAppend)
 
 
-"""
 def txtToExcel():
     excel = Files()
     tables = Tables()
 
-    with open("output/lunchlist.txt") as file:
+    with open("output/lunchlist.txt", encoding="utf-8") as file:
         data = [line.split() for line in file.readlines()]
     table = tables.create_table(data)
 
-    if fs.does_file_exist("output/excel/lunchlist.xlsx"):
-        fs.remove_file("output/excel/lunchlist.xlsx")
-    excel.create_workbook("output/excel/lunchlist.xlsx")
+    if fs.does_file_exist("output/lunchlist.xlsx"):
+        fs.remove_file("output/lunchlist.xlsx")
+    excel.create_workbook("output/lunchlist.xlsx")
     excel.append_rows_to_worksheet(table, "Sheet")
     excel.save_workbook()
-"""
