@@ -1,4 +1,5 @@
 from datetime import date
+import time
 from robocorp.tasks import task
 from RPA.Browser.Selenium import Selenium
 from RPA.Email.ImapSmtp import ImapSmtp
@@ -14,8 +15,8 @@ FILTER_SELECTOR = "css:.compass-label:nth-child(7) > .compass-checkbox"
 SEARCH_INPUT_SELECTOR = "css:.compass-input.search-input"
 SEARCH_TERM = "Helsinki"
 SEARCH_BUTTON_SELECTOR = "xpath://button[contains(.,'Hae')]"
-LOAD_MORE_BUTTON_SELECTOR = "xpath://button[contains(.,'Lataa lis\u00e4\u00e4')]"
-RESTAURANT_LINK_SELECTOR = "xpath://a[contains(.,'N\u00e4yt\u00e4 ruokalista')]"
+LOAD_MORE_BUTTON_SELECTOR = "xpath://button[contains(.,'Lataa lisää')]"
+RESTAURANT_LINK_SELECTOR = "xpath://a[contains(.,'Näytä ruokalista')]"
 RESTAURANT_NAME_SELECTOR = "css:h1.compass-heading"
 BASE_URL = "https://compass-group.fi"
 LUNCH_MENU_PACKAGE = "css:.lunch-menu-block__menu-package"
@@ -49,8 +50,7 @@ def compass_robot_tasks():
             except:
                 pass
 
-        send_html_email()
-        browser.close_browser()
+        # send_html_email()
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
         browser.close_browser()
@@ -76,10 +76,11 @@ def apply_filters():
     browser.click_element(FILTER_SELECTOR)
     browser.input_text(SEARCH_INPUT_SELECTOR, SEARCH_TERM)
     browser.click_element(SEARCH_BUTTON_SELECTOR)
-
+    time.sleep(5)
     # Click "Lataa lisää" until theres no more links to load
     while browser.is_element_visible(LOAD_MORE_BUTTON_SELECTOR):
         browser.click_element(LOAD_MORE_BUTTON_SELECTOR)
+        time.sleep(5)
 
 
 def getLinks():
