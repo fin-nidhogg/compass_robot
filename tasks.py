@@ -50,7 +50,7 @@ def compass_robot_tasks():
             except:
                 pass
 
-        # send_html_email()
+        send_html_email()
     except Exception as error:
         logging.error(f"An error occured: {str(error)}")
         browser.close_browser()
@@ -76,7 +76,7 @@ def apply_filters():
     browser.click_element(FILTER_SELECTOR)
     browser.input_text(SEARCH_INPUT_SELECTOR, SEARCH_TERM)
     browser.click_element(SEARCH_BUTTON_SELECTOR)
-    time.sleep(5)
+    time.sleep(3)
     # Click "Lataa lisää" until theres no more links to load
     while browser.is_element_visible(LOAD_MORE_BUTTON_SELECTOR):
         browser.click_element(LOAD_MORE_BUTTON_SELECTOR)
