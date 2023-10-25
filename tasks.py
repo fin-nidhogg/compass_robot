@@ -22,12 +22,7 @@ BASE_URL = "https://compass-group.fi"
 LUNCH_MENU_PACKAGE = "css:.lunch-menu-block__menu-package"
 LUNCH_NAME_SELECTOR = "h5.compass-heading"
 MEALS_SELECTOR = "css:.lunch-menu-block__content--meals"
-EMAIL_RECIPIENTS = [
-    "ari-pekka.kantola@student.laurea.fi",
-    "aripekka.kantola@gmail.com",
-    "olli.puustinen@student.laurea.fi",
-    "mira.valkama@student.laurea.fi",
-]
+EMAIL_RECIPIENTS = ["olli.puustinen@student.laurea.fi"]
 
 browser = Selenium()
 fs = FileSystem()
@@ -110,7 +105,9 @@ def getMenu(url):
         # Scrape and write name of restaurant into temp file.
         menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
         restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
-        write_to_file(f"<h3>Ravintola: {restaurantName}</h3>\n")
+        write_to_file(
+            f"<h3 style=font-family:Montserrat;>Ravintola: {restaurantName}</h3>\n"
+        )
 
         # Loop through menuPackages and get different menus as a child list.
         # Iterate through menuPackages list and get heading
@@ -123,7 +120,9 @@ def getMenu(url):
             )
 
             # Write H5 and price in the file
-            write_to_file(f"<p><b>{menuName}</b><br><i>{menuPrice}</i></p>")
+            write_to_file(
+                f"<h5 style=font-family:Montserrat;><b>{menuName}</b><br><i>{menuPrice}</i></h5>"
+            )
 
             # Get meal names and write those into file
             mealItems = menuPackage.find_elements(By.CSS_SELECTOR, ".compass-accordion")
@@ -134,7 +133,9 @@ def getMenu(url):
 
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
-                write_to_file(f"{mealName}<br>{mealDiet}<br><br>")
+                write_to_file(
+                    f"<ul style=font-family:Montserrat;><b>{mealName}</b><br><i style=font-size:30 px;>{mealDiet}</i></ul>"
+                )
     except Exception as error:
         write_to_file(
             f"An error occured while getting info from: {url}\n Error: {str(error)}"
