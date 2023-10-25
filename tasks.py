@@ -106,7 +106,7 @@ def getMenu(url):
         menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
         restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
         write_to_file(
-            f"<h3 style=font-family:Montserrat;>Ravintola: {restaurantName}</h3>\n"
+            f"<h3 style=font-family:Montserrat; style=font-size:20 px;>Ravintola: {restaurantName}</h3>\n"
         )
 
         # Loop through menuPackages and get different menus as a child list.
@@ -121,7 +121,7 @@ def getMenu(url):
 
             # Write H5 and price in the file
             write_to_file(
-                f"<h5 style=font-family:Montserrat;><b>{menuName}</b><br><i>{menuPrice}</i></h5>"
+                f"<h5 style=font-family:Montserrat; style=font-size:18 px;><b>{menuName}</b><br><i>{menuPrice}</i></h5>"
             )
 
             # Get meal names and write those into file
@@ -134,7 +134,7 @@ def getMenu(url):
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
                 write_to_file(
-                    f"<ul style=font-family:Montserrat;><b>{mealName}</b><br><i style=font-size:30 px;>{mealDiet}</i></ul>"
+                    f"<ul style=font-family:Montserrat; style=font-size:16 px;><b>{mealName}</b><br><i style=font-size:14 px;>{mealDiet}</i></ul>"
                 )
     except Exception as error:
         write_to_file(
