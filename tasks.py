@@ -20,7 +20,6 @@ RESTAURANT_LINK_SELECTOR = "xpath://a[contains(.,'Näytä ruokalista')]"
 RESTAURANT_NAME_SELECTOR = "css:h1.compass-heading"
 BASE_URL = "https://compass-group.fi"
 LUNCH_MENU_PACKAGE = "css:.lunch-menu-block__menu-package"
-LUNCH_NAME_SELECTOR = "h5.compass-heading"
 MEALS_SELECTOR = "css:.lunch-menu-block__content--meals"
 EMAIL_RECIPIENTS = ["olli.puustinen@student.laurea.fi"]
 
