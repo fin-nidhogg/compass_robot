@@ -75,11 +75,11 @@ def apply_filters():
     browser.click_element(FILTER_SELECTOR)
     browser.input_text(SEARCH_INPUT_SELECTOR, SEARCH_TERM)
     browser.click_element(SEARCH_BUTTON_SELECTOR)
-    time.sleep(3)
+    time.sleep(2)
     # Click "Lataa lisää" until theres no more links to load
     while browser.is_element_visible(LOAD_MORE_BUTTON_SELECTOR):
         browser.click_element(LOAD_MORE_BUTTON_SELECTOR)
-        time.sleep(5)
+        time.sleep(3)
 
 
 def getLinks():
@@ -110,22 +110,29 @@ def getMenu(url):
         menuPackages = browser.find_elements(LUNCH_MENU_PACKAGE)
         restaurantName = browser.get_text(RESTAURANT_NAME_SELECTOR)
         write_to_file(
-            f"<h3 style=font-family:Montserrat;>Ravintola: {restaurantName}</h3>\n"
+            f'<h4 style="font-family:Montserrat;">Ravintola: {restaurantName}</h4>\n'
         )
 
         # Loop through menuPackages and get different menus as a child list.
         # Iterate through menuPackages list and get heading
         for menuPackage in menuPackages:
             menuName = browser.get_text(
-                menuPackage.find_element(By.CSS_SELECTOR, ".compass-heading")
+                menuPackage.find_element(
+                    By.CSS_SELECTOR,
+                    "div.lunch-menu-block__menu-package > h5.compass-heading",
+                )
             )
+
             menuPrice = browser.get_text(
-                menuPackage.find_element(By.CSS_SELECTOR, ".compass-text")
+                menuPackage.find_element(
+                    By.CSS_SELECTOR,
+                    ".compass-text",
+                )
             )
 
             # Write H5 and price in the file
             write_to_file(
-                f"<ul><h4 style=font-family:Montserrat;><b>{menuName}</b><br><i style=font-size 16px;>{menuPrice}</i></h4></ul>"
+                f'<ul><h5 style="font-family: Montserrat;"><b>{menuName}</b><br><i style="font-size: 14px;">{menuPrice if "€" in menuPrice else ""}</i></h5></ul>'
             )
 
             # Get meal names and write those into file
@@ -138,14 +145,14 @@ def getMenu(url):
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
                 write_to_file(
-                    f"<ul style=font-family:Montserrat;><b style=font-size:14 px;>{mealName}</b><br><i style=font-size:12 px;>{mealDiet}</i></ul>"
+                    f'<ul style="font-family:Montserrat;"><b style="font-size: 12px;">{mealName}</b><br><i style="font-size: 10px;">{mealDiet}</i></ul>'
                 )
+
     except Exception as error:
         write_to_file(
             f"An error occured while getting info from: {url}\n Error: {str(error)}"
         )
         logging.error(f"An error occured: {str(error)}")
-        pass
 
 
 def clear_file():
@@ -180,6 +187,6 @@ def send_html_email():
         "compasrobot@gmail.com",
         EMAIL_RECIPIENTS,
         f"Päivän ruokalistat olkaa hyvä ({date.today()})",
-        payload,
+        f"""<html><body>{payload}</body></html>""",
         html=True,
     )
