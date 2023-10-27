@@ -133,7 +133,7 @@ def getMenu(url):
 
             # Write H5 and price in the file
             write_to_file(
-                f'<ul><h5 style="font-family: Montserrat;"><b>{menuName}</b><br><i style="font-size: 14px;">{menuPrice if "€" in menuPrice else ""}</i></h5></ul>'
+                f'<ul><4 style="font-family: Montserrat;"><b>{menuName}</b><br><i style="font-size: 14px;">{menuPrice if "€" in menuPrice else ""}</i></h4></ul>'
             )
 
             # Get meal names and write those into file
@@ -146,7 +146,7 @@ def getMenu(url):
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
                 write_to_file(
-                    f'<ul style="font-family:Montserrat;"><b style="font-size: 12px;">{mealName}</b><br><i style="font-size: 10px;">{mealDiet}</i></ul>'
+                    f'<ul style="font-family:Montserrat;"><b style="font-size: 14px;">{mealName}</b><br><i style="font-size: 12px;">{mealDiet}</i></ul>'
                 )
 
     except Exception as error:
