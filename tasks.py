@@ -1,11 +1,12 @@
 from datetime import date
-import time
 from robocorp.tasks import task
 from RPA.Browser.Selenium import Selenium
 from RPA.Email.ImapSmtp import ImapSmtp
 from RPA.FileSystem import FileSystem
+from robocorp import vault
 from selenium.webdriver.common.by import By
 import logging
+import time
 
 # Setting general variables
 SLOWMODELAY = 1500
@@ -132,7 +133,7 @@ def getMenu(url):
 
             # Write H5 and price in the file
             write_to_file(
-                f'<ul><h5 style="font-family: Montserrat;"><b>{menuName}</b><br><i style="font-size: 14px;">{menuPrice if "€" in menuPrice else ""}</i></h5></ul>'
+                f'<ul><4 style="font-family: Montserrat;"><b>{menuName}</b><br><i style="font-size: 14px;">{menuPrice if "€" in menuPrice else ""}</i></h4></ul>'
             )
 
             # Get meal names and write those into file
@@ -145,7 +146,7 @@ def getMenu(url):
                 mealDiet = browser.get_text(mealItem.find_element(By.TAG_NAME, "p"))
 
                 write_to_file(
-                    f'<ul style="font-family:Montserrat;"><b style="font-size: 12px;">{mealName}</b><br><i style="font-size: 10px;">{mealDiet}</i></ul>'
+                    f'<ul style="font-family:Montserrat;"><b style="font-size: 14px;">{mealName}</b><br><i style="font-size: 12px;">{mealDiet}</i></ul>'
                 )
 
     except Exception as error:
@@ -169,12 +170,12 @@ def write_to_file(txtToAppend):
 def send_html_email():
     # Create an instance of the ImapSmtp class
     mail = ImapSmtp()
-
+    secrets = vault.get_secret("credentials")
     # Read html payload
     payload = fs.read_file("output/lunchlist.html")
     # Configure SMTP server settings. Normally these would be located hidden.
-    mail.account = "compasrobot@gmail.com"
-    mail.password = "nohnpuggskupcqdi"
+    mail.account = secrets["username"]
+    mail.password = secrets["password"]
     mail.smtp_server = "smtp.gmail.com"
     mail.smtp_port = 587
     mail.smtp_starttls = True
@@ -187,6 +188,6 @@ def send_html_email():
         "compasrobot@gmail.com",
         EMAIL_RECIPIENTS,
         f"Päivän ruokalistat olkaa hyvä ({date.today()})",
-        f"""<html><body>{payload}</body></html>""",
+        f"<html><body>{payload}</body></html>",
         html=True,
     )
